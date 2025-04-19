@@ -302,6 +302,7 @@ typedef struct {
 #define CONFIG_SYS_MMC_ENV_DEV  0
 #endif
 
+#define CONFIG_SYS_LONGHELP
 #define CONFIG_LZMA
 
 #define CONFIG_MTD_DEVICE
