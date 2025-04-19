@@ -304,7 +304,7 @@ typedef struct {
 
 #define CONFIG_SYS_LONGHELP
 #define CONFIG_LZMA
-
+#define CONFIG_CMD_LOADB
 #define CONFIG_MTD_DEVICE
 #define CONFIG_MTD_PARTITIONS
 #define CONFIG_CMD_MTDPARTS
