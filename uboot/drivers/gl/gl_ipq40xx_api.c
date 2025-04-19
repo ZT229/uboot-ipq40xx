@@ -938,8 +938,9 @@ void gl_names_init()
 		g_is_flashing_power_led=1;
 		break;
 	case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
-		sprintf(openwrt_fw_name, "openwrt-%s.bin", "*");
-		sprintf(qsdk_fw_name, "qsdk-%s.bin", "*");
+		sprintf(uboot_name, "openwrt-%s.elf", "pq40xx-u-boot-stripped");
+		sprintf(openwrt_fw_name, "openwrt-ipq40xx-generic-%s-squashfs-factory.ubi", "aliyun-ap4220");
+		sprintf(qsdk_fw_name, "qsdk-aliyun-%s.bin", "ap4220");
 		openwrt_firmware_start=0x0;
 		openwrt_firmware_size=0x8000000;
 		g_gpio_power_led=GPIO_AP4220_POWER_LED;
