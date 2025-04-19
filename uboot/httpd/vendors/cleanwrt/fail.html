@@ -1,15 +1,27 @@
 <!DOCTYPE HTML>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>更新失败</title>
-		<link rel="stylesheet" href="style.css">
-	</head>
-	<body>
-		<div id="m">
-			<h1 class="red">更新失败</h1>
-			<div class="i e"><strong>在更新的期间出现一些错误。：</strong>您可能上传了错误的文件格式（文件太大或者太小）也或者您试图在设备上更新ART时选择了不被支持的更新类型/大小，您可以在U-Boot的调试信息中获取更多的信息。</div>
-		</div>
-		<div id="f">You can find more information about this project on <a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub</a>.</div>
-	</body>
+    <head>
+        <meta charset="utf-8">
+        <title>更新失败</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <main id="m">
+            <h1 class="red">更新失败</h1>
+            <div class="info-box error-box">
+                <strong>错误原因：</strong>
+                文件格式错误（大小不符）或更新类型不被支持，请通过 U-Boot 调试日志获取详细信息。
+            </div>
+        </main>
+        <div id="f">
+            <nav>
+                <a href="index.html" class="nav-button">固件更新</a>
+                <a href="uboot.html" class="nav-button">U-Boot 更新</a>
+                <a href="art.html" class="nav-button">ART 更新</a>
+            </nav>
+            <br>
+            更多项目信息请访问
+            <a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub 仓库</a>。
+        </div>
+    </body>
 </html>

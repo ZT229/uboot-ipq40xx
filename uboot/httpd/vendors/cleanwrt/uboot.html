@@ -1,25 +1,38 @@
 <!DOCTYPE HTML>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>U-Boot更新</title>
-		<link rel="stylesheet" href="style.css">
-	</head>
-	<body>
-		<div id="m">
-			<h1>U-BOOT更新</h1>
-			<p>此页面您将要更新 <strong>U-Boot bootloader</strong> 在设备上.<br>请选择文件然后点击 <strong>更新U-Boot</strong> 按钮.</p>
-			<form method="post" enctype="multipart/form-data"><input type="file" name="uboot"><input type="submit" value="更新U-Boot"></form>
-			<div class="i w">
-				<strong>警告</strong>
-				<ul>
-					<li>在更新期间不要断开设备的电源。</li>
-					<li>如果更新顺利，设备将自动重启。</li>
-					<li>您可以上传您想要更新的U-Boot文件, 前提是确保选择正确的适合此设备的U-Boot文件。</li>
-					<li>更新U-Boot是一个非常危险的操作，更新错误的U-Boot可能损坏你的设备!</li>
-				</ul>
-			</div>
-		</div>
-		<div id="f">You can find more information about this project on <a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub</a>.</div>
-	</body>
+    <head>
+        <meta charset="utf-8">
+        <title>U-Boot 更新</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <main id="m">
+            <h1>U-Boot 更新</h1>
+            <p>您可通过此页面更新设备的<strong>U-Boot 引导程序</strong>。<br>请选择文件后点击<strong>更新 U-Boot</strong> 按钮。</p>
+            <form method="post" enctype="multipart/form-data">
+                <label for="uboot-file">选择 U-Boot 文件：</label>
+                <input type="file" name="uboot" id="uboot-file">
+                <input type="submit" value="更新 U-Boot">
+            </form>
+            <div class="info-box warning-box">
+                <strong>警告：</strong>
+                <ul>
+                    <li>更新过程中请勿断开设备电源；</li>
+                    <li>更新成功后设备将自动重启；</li>
+                    <li>请确保所选文件与设备硬件完全兼容；</li>
+                    <li>错误的 U-Boot 文件可能导致设备永久损坏！</li>
+                </ul>
+            </div>
+        </main>
+        <div id="f">
+            <nav>
+                <a href="index.html" class="nav-button">固件更新</a>
+                <a href="uboot.html" class="nav-button active">U-Boot 更新</a>
+                <a href="art.html" class="nav-button">ART 更新</a>
+            </nav>
+            <br>
+            更多项目信息请访问
+            <a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub 仓库</a>。
+        </div>
+    </body>
 </html>

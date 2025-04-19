@@ -1,24 +1,37 @@
 <!DOCTYPE HTML>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title>ART更新</title>
-		<link rel="stylesheet" href="style.css">
-	</head>
-	<body>
-		<div id="m">
-			<h1>ART更新</h1>
-			<p>您将要在此页面下更新此设备的<strong> ART(Atheros Radio Test)数据</strong>。<br>请选择文件以便上传并点击<strong>更新ART</strong>按钮。</p>
-			<form method="post" enctype="multipart/form-data"><input type="file" name="art"><input type="submit" value="更新 ART"></form>
-			<div class="i w">
-				<strong>警告：</strong>
-				<ul>
-					<li>在更新期间不要断开电源</li>
-					<li>如果更新顺利，设备将自动重启</li>
-					<li>您可以上传您想要的固件, 请确保选择正确的ART文件</li>
-				</ul>
-			</div>
-		</div>
-		<div id="f">You can find more information about this project on <a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub</a>.</div>
-	</body>
+    <head>
+        <meta charset="utf-8">
+        <title>ART 数据更新</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <main id="m">
+            <h1>ART 数据更新</h1>
+            <p>您可通过此页面更新设备的<strong>ART（Atheros 射频测试数据）</strong>。<br>请选择文件后点击<strong>更新 ART</strong> 按钮。</p>
+            <form method="post" enctype="multipart/form-data">
+                <label for="art-file">选择 ART 文件：</label>
+                <input type="file" name="art" id="art-file">
+                <input type="submit" value="更新 ART">
+            </form>
+            <div class="info-box warning-box">
+                <strong>警告：</strong>
+                <ul>
+                    <li>更新过程中请勿断开设备电源；</li>
+                    <li>更新成功后设备将自动重启；</li>
+                    <li>请确保所选文件与设备无线模块兼容。</li>
+                </ul>
+            </div>
+        </main>
+        <div id="f">
+            <nav>
+                <a href="index.html" class="nav-button">固件更新</a>
+                <a href="uboot.html" class="nav-button">U-Boot 更新</a>
+                <a href="art.html" class="nav-button active">ART 更新</a>
+            </nav>
+            <br>
+            更多项目信息请访问
+            <a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub 仓库</a>。
+        </div>
+    </body>
 </html>

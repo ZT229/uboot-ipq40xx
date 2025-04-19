@@ -1,78 +1,109 @@
-h1,
-p,
-form,
-ul {
-	margin: 0;
-	padding: 0;
-}
+h1, p, form, ul { margin: 0; padding: 0; }
 
-html,
-body {
-	font: 13px/20px Arial, sans-serif;
-	background: #EDEDED;
+html, body {
+    font: 13px/20px Arial, sans-serif;
+    background: #f8f9fa;
+    min-height: 100vh;
 }
 
 #m {
-	max-width: 750px;
-	margin: 30px auto 10px;
-	border: solid 1px #BABABA;
-	background: #FFF;
-	border-radius: 7px;
-	box-shadow: 0 0 10px #D2D1D1;
+    max-width: 750px;
+    margin: 30px auto 10px;
+    border: solid 1px #dee2e6;
+    background: #ffffff;
+    border-radius: 7px;
+    box-shadow: 0 0 12px rgba(210, 209, 209, 0.1);
 }
 
-#m > * {
-	padding: 20px;
-}
+#m > * { padding: 20px; }
 
 h1 {
-	font: bold 50px/50px Tahoma;
-	border-bottom: solid 1px #E8E8E8;
+    font: bold 50px/50px Tahoma;
+    border-bottom: solid 1px #E8E8E8;
+    text-align: center;
+    color: #2450AD;
 }
 
-a,
-h1 {
-	color: #2450AD;
-	text-decoration: none;
+a { color: #2450AD; text-decoration: none; }
+
+.info-box {
+    margin: 20px;
+    border-radius: 7px;
+    text-align: justify;
 }
 
-.i {
-	margin: 20px;
-	border-radius: 7px;
-	text-align: justify;
+.warning-box {
+    background: #fff3cd;
+    border: solid 1px #ffeeba;
 }
 
-.w {
-	background: #FEFDCE;
-	border: solid 1px #FFC643;
-}
-
-.e {
-	background: #FFE7E7;
-	border:solid 1px #FE7171;
+.error-box {
+    background: #f8d7da;
+    border: solid 1px #f5c6cb;
 }
 
 #f {
-	text-align: center;
-	color: #969393;
+    text-align: center;
+    color: #6c757d;
+    padding: 20px 0;
+    background: rgba(255, 255, 255, 0.9);
+    border-top: 1px solid #dee2e6;
 }
 
-form,
-p,
-h1 {
-	text-align: center;
-}
+form, p { text-align: center; }
 
 ul {
-	list-style: square;
-	margin: 0 0 0 20px;
+    list-style: square;
+    margin: 0 0 0 20px;
 }
 
-.red {
-	color: #E41616;
+.red { color: #E41616; }
+
+.info-box strong { margin: 0 0 5px; display: block; }
+
+#loader {
+    height: 30px;
+    width: 30px;
+    margin: 0 auto 20px;
+    animation: rotate 1s infinite linear;
+    border: 7px solid #e9ecef;
+    border-top: 7px solid #2450AD;
+    border-radius: 100%;
 }
 
-.i strong {
-	margin: 0 0 5px;
-	display: block;
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(359deg); }
+}
+
+/* 导航按钮样式 */
+#f nav {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.nav-button {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 2px solid #2450AD;
+    border-radius: 5px;
+    color: #2450AD;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.nav-button:hover {
+    background: #2450AD;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+.nav-button.active {
+    background: #2450AD;
+    color: #ffffff;
+    border-color: #2450AD;
 }
