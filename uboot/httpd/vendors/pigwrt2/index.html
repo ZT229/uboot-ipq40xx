@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>固件更新</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body>
+		<div id="m">
+			<div id="nav">
+				<a href="index.html" class="nav-button active">固件更新</a>
+				<a href="art.html" class="nav-button">ART 更新</a>
+				<a href="uboot.html" class="nav-button">U-Boot 更新</a>
+			</div>
+			<div id="content">
+				<div class="content-wrapper">
+					<h1>固件更新</h1>
+					<p>您将要更新此设备<strong>固件</strong>。<br>请从本地硬盘选择要更新的路由器固件并点击<strong>更新固件</strong>按钮。</p>
+					<form method="post" enctype="multipart/form-data">
+						<div class="form-row">
+							<input type="file" name="firmware">
+							<input type="submit" value="更新固件">
+						</div>
+					</form>
+					<div class="i w">
+						<strong>提醒：</strong>
+						<ul>
+							<li>在更新期间不要断开路由器电源</li>
+							<li>如果更新顺利，设备将自动重启</li>
+							<li>请确保选择正确的固件文件</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="f">You can find more information about this project on <a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub</a>.</div>
+	</body>
+</html>
