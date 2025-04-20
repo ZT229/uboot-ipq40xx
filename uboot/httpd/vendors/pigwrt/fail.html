@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>操作失败</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="sidebar">
+        <nav>
+            <a href="index.html" class="nav-button">🏠 固件更新</a>
+            <a href="uboot.html" class="nav-button">🔧 U-Boot更新</a>
+            <a href="art.html" class="nav-button">📶 ART更新</a>
+        </nav>
+    </div>
+
+    <div id="main-content">
+        <div class="content-box">
+            <h1 class="error">❌ 更新失败</h1>
+            <div class="alert-box error">
+                <strong>📉 失败原因：</strong>
+                <p>文件校验失败（MD5不匹配）或设备存储空间不足</p>
+                <button onclick="history.back()" class="nav-button" style="margin-top:15px;">↩️ 返回重试</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

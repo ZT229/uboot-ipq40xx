@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>更新进行中</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        #loader { /* 原有样式保持不变 */ }
+        @keyframes spin { /* 原有动画保持不变 */ }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <nav>
+            <a href="index.html" class="nav-button">🏠 固件更新</a>
+            <a href="uboot.html" class="nav-button">🔧 U-Boot</a>
+            <a href="art.html" class="nav-button">📶 ART数据</a>
+        </nav>
+    </div>
+
+    <div id="main-content">
+        <div class="content-box">
+            <h1>⏳ 正在写入设备...</h1>
+            <div id="loader"></div>
+            <div class="alert-box">
+                <p>📦 已接收文件大小：<span id="progress">0%</span></p>
+                <p>⏱️ 预计剩余时间：<span id="timer">--</span></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>固件更新</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="sidebar">
+        <nav>
+            <a href="index.html" class="nav-button active">🏠 固件更新</a>
+            <a href="uboot.html" class="nav-button">🔧 U-Boot更新</a>
+            <a href="art.html" class="nav-button">📶 ART更新</a>
+        </nav>
+    </div>
+
+    <div id="main-content">
+        <div class="content-box">
+            <h1>⚙️ 固件更新</h1>
+            <div class="form-group">
+                <form method="post" enctype="multipart/form-data">
+                    <label>📁 请选择固件文件：</label>
+                    <input type="file" name="firmware" required>
+                    <input type="submit" value="✅ 确认固件更新">
+                </form>
+            </div>
+            <div class="alert-box warning">
+                <strong>⚠️ 重要提示</strong>
+                <ul>
+                    <li>更新过程中请勿断开设备电源；</li>
+                    <li>更新成功后设备将自动重启；</li>
+                    <li>请选择与设备型号匹配的固件文件。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
