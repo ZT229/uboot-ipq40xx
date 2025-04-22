@@ -1,39 +1,65 @@
-<!DOCTYPE html>
-<html>
+<!DOCTYPE HTML>
+<html lang="zh">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ART数据更新</title>
-    <link rel="stylesheet" href="style.css">
+	<meta charset="utf-8">
+	<title>ART更新</title>
+	<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="sidebar">
-        <nav>
-            <a href="index.html" class="nav-button">🏠 固件更新</a>
-            <a href="uboot.html" class="nav-button">🔧 U-Boot更新</a>
-            <a href="art.html" class="nav-button active">📶 ART更新</a>
-        </nav>
-    </div>
-
-    <div id="main-content">
-        <div class="content-box">
-            <h1>📶 ART更新</h1>
-            <div class="form-group">
-                <form method="post" enctype="multipart/form-data">
-                    <label>📁 请选择ART文件：</label>
-                    <input type="file" name="art" required>
-                    <input type="submit" value="✅ 确认ART更新">
-                </form>
-            </div>
-            <div class="alert-box warning">
-                <strong>⚠️ 注意事项</strong>
-                <ul>
-                    <li>更新过程中请勿断开设备电源，更新成功后设备将自动重启；</li>
-                    <li>错误数据可能导致无线性能下降、加速芯片老化，甚至损坏硬件；</li>
-                    <li>操作前请备份原始数据，确保文件与设备兼容。</li>
-                </ul>
-            </div>
-        </div>
-    </div>
+	<div id="main-wrapper" class="collapsed">
+		<div id="nav">
+			<div id="collapse-toggle" class="collapse-btn">>></div>
+			<a href="index.html" class="nav-button">固件更新</a>
+			<a href="art.html" class="nav-button active">ART更新</a>
+			<a href="uboot.html" class="nav-button">U-Boot更新</a>
+		</div>
+		<div id="content">
+			<h1>ART更新</h1>
+			<p>您即将更新设备的<strong>ART(Atheros无线芯片的频率校正数据)</strong>。<br>请从本地选择要更新的ART文件并点击<strong>更新ART</strong>按钮。</p>
+			<form method="post" enctype="multipart/form-data">
+				<div class="form-row">
+					<input type="file" name="art" id="art-file">
+					<input type="submit" value="更新ART" class="submit-btn" disabled>
+				</div>
+			</form>
+			<div class="i w">
+				<strong>温馨提示：</strong>
+				<ul>
+					<li>请勿在更新过程中断开路由器电源；</li>
+					<li>如果更新成功，设备将自动重启；</li>
+					<li>请确认所选的ART文件是正确的。</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div id="f">
+		您可以在以下链接中了解本项目的更多信息：<br>
+		<a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub</a><br>
+		<a href="https://github.com/1980490718/uboot-ipq40xx" target="_blank">UI支持</a><br>
+	</div>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const toggle = document.getElementById('collapse-toggle');
+			const wrapper = document.getElementById('main-wrapper');
+			if (toggle && wrapper) {
+				toggle.addEventListener('click', () => {
+					wrapper.classList.toggle('collapsed');
+					toggle.innerText = wrapper.classList.contains('collapsed') ? '>>' : '<<';
+				});
+			}
+		});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const fileInput = document.getElementById('art-file');
+			const submitBtn = document.querySelector('.submit-btn');
+			if (fileInput && submitBtn) {
+				fileInput.addEventListener('change', function () {
+					submitBtn.disabled = fileInput.files.length === 0;
+				});
+			}
+		});
+	</script>
 </body>
 </html>
+

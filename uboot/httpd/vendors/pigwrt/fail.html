@@ -1,29 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
+<!DOCTYPE HTML>
+<html lang="zh">
+  <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>操作失败</title>
+    <title>更新失败</title>
     <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="sidebar">
-        <nav>
-            <a href="index.html" class="nav-button">🏠 固件更新</a>
-            <a href="uboot.html" class="nav-button">🔧 U-Boot更新</a>
-            <a href="art.html" class="nav-button">📶 ART更新</a>
-        </nav>
-    </div>
-
-    <div id="main-content">
-        <div class="content-box">
-            <h1 class="error">❌ 更新失败</h1>
-            <div class="alert-box error">
-                <strong>📉 失败原因：</strong>
-                <p>文件校验失败（MD5不匹配）或设备存储空间不足</p>
-                <button onclick="history.back()" class="nav-button" style="margin-top:15px;">↩️ 返回重试</button>
-            </div>
+  </head>
+  <body>
+    <div id="m">
+      <div id="content">
+        <div class="content-wrapper">
+          <h1 class="i e">更新失败</h1>
+          <div class="w">
+            <strong>更新出错：</strong>更新失败：可能是您选择了错误的固件文件，或者使用了不受支持的文件类型更新。重试后如果问题仍然存在，建议与文件提供方联系。同时，您可以在更新过程中通过U-Boot控制台获取更多信息。
+          </div>
+          <div class="form-row">
+            <a href="index.html" class="nav-button return-btn">返回首页</a>
+          </div>
         </div>
+      </div>
     </div>
-</body>
+<div id="f">
+  您可以在以下链接中了解本项目的更多信息：<br>
+  <a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub</a><br>
+  <a href="https://github.com/1980490718/uboot-ipq40xx" target="_blank">UI支持</a><br>
+</div>
+  </body>
 </html>

@@ -1,33 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>更新进行中</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        #loader { /* 原有样式保持不变 */ }
-        @keyframes spin { /* 原有动画保持不变 */ }
-    </style>
-</head>
-<body>
-    <div id="sidebar">
-        <nav>
-            <a href="index.html" class="nav-button">🏠 固件更新</a>
-            <a href="uboot.html" class="nav-button">🔧 U-Boot</a>
-            <a href="art.html" class="nav-button">📶 ART数据</a>
-        </nav>
-    </div>
-
-    <div id="main-content">
-        <div class="content-box">
-            <h1>⏳ 正在写入设备...</h1>
-            <div id="loader"></div>
-            <div class="alert-box">
-                <p>📦 已接收文件大小：<span id="progress">0%</span></p>
-                <p>⏱️ 预计剩余时间：<span id="timer">--</span></p>
-            </div>
-        </div>
-    </div>
-</body>
+<!DOCTYPE HTML>
+<html lang="zh">
+	<head>
+		<meta charset="utf-8">
+		<title>更新进行中</title>
+		<link rel="stylesheet" href="style.css">
+		<style>
+			*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:"Arial",sans-serif;background-color:#f4f6f9}#m{max-width:750px;margin:40px auto;background:#ffffff;border-radius:8px;box-shadow:0 4px 15px rgba(0,0,0,0.1);overflow:hidden}#content{padding:30px;text-align:center}h1{font-size:32px;color:#333;margin-bottom:20px}p{font-size:15px;color:#555;line-height:1.6}#l{height:30px;width:30px;margin:0 auto 20px;border-left:7px solid #EAF1FF;border-right:7px solid #EAF1FF;border-bottom:7px solid #EAF1FF;border-top:7px solid #2450AD;border-radius:100%;animation:r 1s infinite linear}@keyframes r{from{transform:rotate(0deg)}to{transform:rotate(359deg)}}#f{text-align:center;padding:20px;color:#888;font-size:15px}#f a{color:#2f54eb;text-decoration:none}#f a:hover{text-decoration:underline}
+		</style>
+	</head>
+	<body>
+		<div id="m">
+			<div id="content">
+				<h1>更新进行中</h1>
+				<p>文件已成功上传！当前正在进行更新，请耐心等待，设备将在更新完成后自动重启。<br>更新时间会根据固件的大小有所不同，最多可能需要几分钟。您可以在此期间关闭此页面。</p>
+				<div id="l"></div>
+			</div>
+		</div>
+		<div id="f">
+			您可以在以下链接中了解本项目的更多信息：<br>
+			<a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub</a><br>
+			<a href="https://github.com/1980490718/uboot-ipq40xx" target="_blank">UI支持</a><br>
+		</div>
+	</body>
 </html>
