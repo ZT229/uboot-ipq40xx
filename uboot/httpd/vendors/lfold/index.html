@@ -1,0 +1,70 @@
+<!DOCTYPE HTML>
+<html lang="zh">
+<head>
+	<meta charset="utf-8">
+	<title>固件更新</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="page-container">
+		<div class="card-layout">
+			<div class="sidebar collapsed" id="sidebar">
+				<button class="toggle-btn" id="toggle-btn" title="展开菜单">⬅️</button>
+				<a href="index.html" class="nav-button active" title="固件更新">
+					<span class="menu-icon">📥</span><span class="menu-text">固件更新</span>
+				</a>
+				<a href="art.html" class="nav-button" title="ART更新">
+					<span class="menu-icon">📶</span><span class="menu-text">ART更新</span>
+				</a>
+				<a href="uboot.html" class="nav-button" title="U-BOOT更新">
+					<span class="menu-icon">🚀</span><span class="menu-text">U-BOOT更新</span>
+				</a>
+			</div>
+			<div class="main-content">
+				<h1>固件更新</h1>
+				<p>请选择<strong>固件文件</strong>后点击下方的<strong>更新固件</strong>按钮。</p>
+				<form method="post" enctype="multipart/form-data">
+					<div class="form-row">
+						<input type="file" name="firmware" id="firmware-file">
+						<input type="submit" value="更新固件" class="submit-btn" disabled>
+					</div>
+				</form>
+				<div class="i w">
+					<strong>温馨提示：</strong>
+					<ul>
+						<li>请勿在更新过程中断开路由器电源；</li>
+						<li>如果更新成功，设备将自动重启；</li>
+						<li>请确认所选的固件文件是正确的。</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="f">
+		您可以在以下链接中了解本项目的更多信息：<br>
+		<a href="https://github.com/pepe2k/u-boot_mod" target="_blank">GitHub</a><br>
+		<a href="https://github.com/1980490718/uboot-ipq40xx" target="_blank">UI支持</a><br>
+	</div>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const toggleBtn = document.getElementById('toggle-btn');
+			const sidebar = document.getElementById('sidebar');
+			toggleBtn.addEventListener('click', function () {
+				sidebar.classList.toggle('collapsed');
+				const collapsed = sidebar.classList.contains('collapsed');
+				toggleBtn.textContent = collapsed ? '⬅️' : '➡️';
+				toggleBtn.title = collapsed ? '展开菜单' : '收起菜单';
+			});
+		});
+	</script>
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const fileInput = document.getElementById('firmware-file');
+			const submitBtn = document.querySelector('.submit-btn');
+			fileInput.addEventListener('change', function () {
+				submitBtn.disabled = fileInput.files.length === 0;
+			});
+		});
+	</script>
+</body>
+</html>
