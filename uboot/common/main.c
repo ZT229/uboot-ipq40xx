@@ -230,15 +230,18 @@ int abortboot(int bootdelay)
 {
 	int abort = 0;
 
-#ifdef CONFIG_WINDOWS_UPGRADE_SUPPORT
-    udelay(3000000);
-#endif
-
 #ifdef CONFIG_MENUPROMPT
 	printf(CONFIG_MENUPROMPT);
 #else
 	printf("Hit any key to stop autoboot: %2d ", bootdelay);
 #endif
+
+#ifdef CONFIG_WINDOWS_UPGRADE_SUPPORT
+    udelay(1000000);
+#endif
+
+	if (bootdelay <= 0)
+		return abort;
 
 #if defined CONFIG_ZERO_BOOTDELAY_CHECK
 	/*
@@ -280,7 +283,7 @@ int abortboot(int bootdelay)
 			}
 			udelay(10000);
 		}
-		
+
 		printf("\b\b\b%2d ", bootdelay);
 
 #ifdef CONFIG_WINDOWS_UPGRADE_SUPPORT
@@ -309,8 +312,8 @@ int abortboot(int bootdelay)
 # endif	/* CONFIG_AUTOBOOT_KEYED */
 #endif	/* CONFIG_BOOTDELAY >= 0  */
 
-
 /****************************************************************************/
+
 void main_loop (void)
 {
 #ifndef CONFIG_SYS_HUSH_PARSER
@@ -469,7 +472,9 @@ void main_loop (void)
 		default:
 			break;
 		}
-		udelay( 1000000 );
+		udelay( 500000 );
+
+		counter += 0.5;
 	
 		switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
@@ -488,9 +493,9 @@ void main_loop (void)
 			break;
 		}
 
-		udelay( 1000000 );
+		udelay( 500000 );
 
-		counter++;
+		counter += 0.5;
 
 		//printf("%2d second(s), %ld\n", counter, get_timer(0));
 		printf("\b\b\b\b\b\b\b\b\b\b\b\b%2d second(s)", counter);
@@ -530,7 +535,7 @@ void main_loop (void)
 		g_http_update = 1;
 		goto SKIPBOOT;
 
-	} else if ((counter <= 1) && (counter > 0)) {
+	} else if ((counter <= 3) && (counter > 0)) {
 		printf( "\n\nCaution: reset button wasn't held long enough!\nContinuing normal boot...\n\n" );
 	} else {
 	}
@@ -575,7 +580,7 @@ void main_loop (void)
 #ifdef CONFIG_HTTPD
 SKIPBOOT:
 	if (g_http_update) {
-		udelay(6000000);
+		udelay(3000000);
 		HttpdLoop();
 	}
 #endif
@@ -1573,6 +1578,7 @@ int run_command(const char *cmd, int flag)
 int do_run_origin (cmd_tbl_t * cmdtp, int flag, int argc, char * const argv[])
 {
 	int i;
+
 	if (argc < 2)
 		return CMD_RET_USAGE;
 
