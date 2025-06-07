@@ -18,19 +18,20 @@ make
 ./build.sh cdp
 ```
 或者
-````
+```
 ./build.sh ap4220
 ```
-make生成的uboot为：
-bin/openwrt-ipq40xx-u-boot-stripped.elf
-
-./build.sh cdp生成的uboot为：
-
-bin/openwrt-cdp-u-boot-stripped.elf
-
-./build.sh ap4220生成的uboot为：
-
-bin/openwrt-ap4220-u-boot-stripped.elf
+make
+```
+生成的uboot为：bin/openwrt-ipq40xx-u-boot-stripped.elf
+```
+./build.sh cdp
+```
+生成的uboot为：bin/openwrt-cdp-u-boot-stripped.elf
+```
+./build.sh ap4220
+```
+生成的uboot为：bin/openwrt-ap4220-u-boot-stripped.elf
 
 ## web升级
 
