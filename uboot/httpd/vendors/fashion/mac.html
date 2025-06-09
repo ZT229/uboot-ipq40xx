@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		// 自动添加分隔符（用户输入第2、4、6、8、10个字符时）
 		let formattedValue = '';
 		for (let i = 0; i < cleanValue.length; i++) {
-			if (i > 0 && (i % 2 === 0) && i < 10) {
+			if (i > 0 && (i % 2 === 0) && i < 12) {
 				// 检测用户是否输入了分隔符
 				if (value.length > cursorPos - 1 && (value[cursorPos - 1] === ':' || value[cursorPos - 1] === '-')) {
 					formattedValue += value[cursorPos - 1]; // 保留用户输入的分隔符
