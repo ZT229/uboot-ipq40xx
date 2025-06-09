@@ -18,9 +18,7 @@
 		<main class="content-area">
 			<section class="content-page active" id="page-mac">
 				<h1>🛠️MAC管理</h1>
-				<!-- 添加 upload-card 包裹层 -->
 				<div class="upload-card">
-					<!-- 第一行：标签 -->
 					<div class="form-row">
 						<div class="form-group">
 							<label for="action-type">操作类型</label>
@@ -32,7 +30,6 @@
 							<label for="mac-address">MAC地址</label>
 						</div>
 					</div>
-					<!-- 第二行：输入控件 -->
 					<div class="form-row">
 						<div class="form-group">
 							<select id="action-type" class="form-control">
@@ -51,7 +48,7 @@
 						</div>
 						<div class="form-group">
 							<input type="text" id="mac-address" class="form-control" 
-								placeholder="格式: aa:bb:cc:dd:ee:ff 或 aa-bb-cc-dd-ee-ff 或 aabbccddeeff">
+								placeholder="格式:a0b1c2d3e4f5或a0:b1:c2:d3:e4:f5自动追加间隔符">
 						</div>
 					</div>
 					<button class="submit-btn" id="mac-submit" type="button">执行操作</button>
@@ -78,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		macAddress: document.getElementById('mac-address'),
 		iface: document.getElementById('interface')
 	};
-	// 保证 result-content 始终存在
 	function getResultContent() {
 		let result = dom.resultBox.querySelector('.result-content');
 		if (!result) {
@@ -89,31 +85,31 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 		return result;
 	}
-	// 自动格式化MAC地址输入
+	// 格式化MAC地址
 	dom.macAddress.addEventListener('input', function(e) {
 		let value = e.target.value.replace(/[^a-fA-F0-9: -]/g, '');
 		let cursorPos = e.target.selectionStart;
-		// 移除所有非字母数字字符
+		// 移除非字母数字字符
 		let cleanValue = value.replace(/[^a-fA-F0-9]/g, '');
-		// 如果长度超过12，截断
+		// 限制12位长度
 		if (cleanValue.length > 12) {
 			cleanValue = cleanValue.substring(0, 12);
 		}
-		// 自动添加分隔符（用户输入第2、4、6、8、10个字符时）
+		// 自动添加分隔符
 		let formattedValue = '';
 		for (let i = 0; i < cleanValue.length; i++) {
 			if (i > 0 && (i % 2 === 0) && i < 12) {
-				// 检测用户是否输入了分隔符
+				// 检测分隔符
 				if (value.length > cursorPos - 1 && (value[cursorPos - 1] === ':' || value[cursorPos - 1] === '-')) {
-					formattedValue += value[cursorPos - 1]; // 保留用户输入的分隔符
+					formattedValue += value[cursorPos - 1]; // 保留输入的分隔符
 				} else {
-					formattedValue += ':'; // 默认使用冒号
+					formattedValue += ':'; // 默认冒号
 				}
 			}
 			formattedValue += cleanValue[i];
 		}
 		e.target.value = formattedValue.toLowerCase();
-		// 恢复光标位置
+		// 光标位置
 		let newCursorPos = cursorPos;
 		if (formattedValue.length > value.length) {
 			newCursorPos += formattedValue.length - value.length;
@@ -128,15 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
 		const action = dom.actionType.value;
 		const iface = dom.iface.value;
 		let mac = dom.macAddress.value.trim();
-		// 清理MAC地址格式（移除所有非字母数字字符）
+		// 清理MAC地址格式
 		mac = mac.replace(/[^a-fA-F0-9]/g, '');
 		if (action === 'write' && mac.length !== 12) {
 			dom.resultBox.className = 'error';
-			result.innerHTML = '<div style="text-align: center">错误：MAC地址格式无效</div>';
+			result.innerHTML = '<div class="text-center">错误：MAC地址格式无效</div>';
 			return;
 		}
 		dom.resultBox.className = '';
-		result.innerHTML = '处理中...';
+		result.innerHTML = '<div class="text-center">处理中...</div>';
 		let params = 'action=' + encodeURIComponent(action) + '&iface=' + encodeURIComponent(iface);
 		if (action === 'write') params += '&mac=' + encodeURIComponent(mac);
 		fetch('/macrw', {
@@ -147,9 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
 		.then(txt => {
 			if (txt.indexOf('成功') !== -1 || txt.indexOf('success') !== -1) {
 				dom.resultBox.className = 'success';
-				result.innerHTML = '<div style="text-align:center">' + txt + '</div>';
-
-				// 若为读取操作，自动填充MAC地址（带冒号分隔符）
+				result.innerHTML = '<div class="text-center">' + txt + '</div>';
+				// 读取时自动填充冒号
 				if (action === 'read') {
 					const match = txt.match(/([0-9a-fA-F]{2}):([0-9a-fA-F]{2}):([0-9a-fA-F]{2}):([0-9a-fA-F]{2}):([0-9a-fA-F]{2}):([0-9a-fA-F]{2})/i);
 					if (match) {
@@ -158,11 +153,11 @@ document.addEventListener('DOMContentLoaded', () => {
 				}
 			} else {
 				dom.resultBox.className = 'error';
-				result.innerHTML = '<div style="text-align:center">' + txt + '</div>';
+				result.innerHTML = '<div class="text-center">' + txt + '</div>';
 			}
 		}).catch(() => {
 			dom.resultBox.className = 'error';
-			result.innerHTML = '<div style="text-align: center">请求失败</div>';
+			result.innerHTML = '<div class="text-center">请求失败</div>';
 		});
 	});
 });
