@@ -124,7 +124,7 @@ jobs:
         echo "Current UTC+8 time at build start: $(date +'%Y-%m-%d %H:%M:%S')" >> build-info.txt
         
         # Replace hardcoded paths with environment variables
-        sed -i "s|/home/a/uboot-ipq40xx1/openwrt-sdk-ipq806x-qsdk53/staging_dir|$GITHUB_WORKSPACE/openwrt-sdk-ipq806x-qsdk53/staging_dir|g" build.sh
+        sed -i "s|/home/a/1980490718/openwrt-sdk-ipq806x-qsdk53/staging_dir|$GITHUB_WORKSPACE/openwrt-sdk-ipq806x-qsdk53/staging_dir|g" build.sh
         
         # Set build environment variables with ccache support
         export MAKECMD="make --silent ARCH=arm CROSS_COMPILE=\"ccache arm-openwrt-linux-\""
