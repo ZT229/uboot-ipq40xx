@@ -20,10 +20,8 @@ unsigned long hex2int(const char *a, unsigned int len) {
 	}
 	return val;
 }
-
 int do_checkout_firmware(void) {
 	#define CHECK_ADDR(addr, val) (*(volatile unsigned char *)(addr) == (val))
-	
 	if (CHECK_ADDR(0x8800005c, 0x46) &&  // 'F'
 		CHECK_ADDR(0x8800005d, 0x6c) &&  // 'l'
 		CHECK_ADDR(0x8800005e, 0x61) &&  // 'a'
@@ -31,21 +29,17 @@ int do_checkout_firmware(void) {
 		CHECK_ADDR(0x88000060, 0x68)) {  // 'h'
 		return FW_TYPE_QSDK;
 	}
-	
 	if (CHECK_ADDR(0x880001fe, 0x55) && 
 		CHECK_ADDR(0x880001ff, 0xAA)) {
 		return FW_TYPE_OPENWRT_EMMC;
 	}
-	
 	return FW_TYPE_OPENWRT;
 }
-
 int upgrade(void) {
 	char cmd[128] = {0};
 	int fw_type = do_checkout_firmware();
 	const char *filesize = getenv("filesize");
 	unsigned long file_size = filesize ? hex2int(filesize, strlen(filesize)) : 0;
-	
 	switch (fw_type) {
 		case FW_TYPE_OPENWRT:
 			switch (gboard_param->machid) {
@@ -60,7 +54,6 @@ int upgrade(void) {
 						"sf probe && sf erase 0x%x 0x%x && sf write 0x88000000 0x%x $filesize",
 						openwrt_firmware_start, openwrt_firmware_size, openwrt_firmware_start);
 					break;
-					
 				case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 				case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
 					snprintf(cmd, sizeof(cmd),
@@ -69,25 +62,24 @@ int upgrade(void) {
 					break;
 			}
 			break;
-			
 		case FW_TYPE_OPENWRT_EMMC:
-			if (file_size > 0) {
-				unsigned long blocks = (file_size / 512) + 1;
-				snprintf(cmd, sizeof(cmd),
-					"mmc erase 0x0 0x109800 && mmc write 0x88000000 0x0 0x%lx", blocks);
-				printf("%s\n", cmd);
+			switch (gboard_param->machid) {
+				case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
+				case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
+					snprintf(cmd, sizeof(cmd),
+						"erase 0x0 0x109800 && mmc write 0x88000000 0x0 0x%lx",
+						(unsigned long int) (hex2int(getenv("filesize"), strlen(getenv("filesize")))) / 512+ 1);
+					printf("%s\n", cmd);
+					break;
 			}
 			break;
-			
 		default:
 			snprintf(cmd, sizeof(cmd),
 				"sf probe && imgaddr=0x88000000 && source $imgaddr:script");
 			break;
 	}
-	
 	return run_command(cmd, 0);
 }
-
 void LED_INIT(void) {
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
@@ -117,7 +109,6 @@ void LED_INIT(void) {
 			break;
 	}
 }
-
 void LED_BOOTING(void) {
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
@@ -132,11 +123,9 @@ void LED_BOOTING(void) {
 			break;
 	}
 }
-
 void wan_led_toggle(void)
 {
 }
-
 int openwrt_firmware_start;
 int openwrt_firmware_size;
 int power_led;
@@ -205,11 +194,9 @@ void board_names_init()
 		break;
 	}
 }
-
 #ifdef CONFIG_QCA_MMC
 static qca_mmc *host = &mmc_host;
 #endif
-
 void get_mmc_part_info() {
 	block_dev_desc_t *blk_dev;
 	blk_dev = mmc_get_dev(host->dev_num);
@@ -219,7 +206,6 @@ void get_mmc_part_info() {
 		printf("\n\n");
 	}
 }
-
 #ifdef CONFIG_HTTPD
 int do_httpd(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 {
