@@ -85,10 +85,12 @@ int do_backupfw(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		return CMD_RET_FAILURE;
 	}
 	char cmd[128];
+	printf("\n");
 	snprintf(cmd, sizeof(cmd), 
 		"tftpput 0x88000000 0x%x firmware_backup.bin", openwrt_firmware_size);
 	if (run_command(cmd, 0) == 0) {
 		printf("Success: Firmware backup completed\n");
+		printf("Backup filename: firmware_backup.bin\n");
 		return CMD_RET_SUCCESS;
 	}
 	printf("Error: Firmware backup failed\n");
