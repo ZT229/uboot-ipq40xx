@@ -269,7 +269,7 @@ int abortboot(int bootdelay)
 
 		printf("\b\b\b%2d ", bootdelay);
 	}
-	puts("\n\n");
+	puts("\n");
 
 #ifdef CONFIG_IPQ_ETH_INIT_DEFER
 	//if (abort) {
@@ -427,7 +427,7 @@ void main_loop (void)
 	}
 
 	if (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
-		printf( "\nPress reset button for at least 3 seconds to enter web failsafe mode\n\n" );
+		printf( "\nPress reset button for at least 3 seconds to enter web failsafe mode\n" );
 		printf( "Reset button held for: %2d second(s)", counter);
 	}
 	while (gpio_get_value(gpio_reset_btn) == GPIO_VAL_BTN_PRESSED) {
@@ -488,7 +488,7 @@ void main_loop (void)
 	
 	if (counter > 2) {
 	
-		printf( "\n\nReset button was held for %d seconds\nHTTP server is starting for firmware update...\n\n", counter );
+		printf( "\nReset button was held for %d seconds\nHTTP server is starting for firmware update...\n", counter );
 	switch (gboard_param->machid) {
 	case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 		gpio_set_value(GPIO_S1300_MESH_LED, 1);
@@ -513,7 +513,7 @@ void main_loop (void)
 		goto SKIPBOOT;
 
 	} else if ((counter <= 1) && (counter > 0)) {
-		printf( "\n\nCaution: reset button wasn't held long enough!\nContinuing normal boot...\n\n" );
+		printf( "\nCaution: reset button wasn't held long enough!\nContinuing normal boot...\n" );
 	} else {
 	}
 	if(gboard_param->machid==MACH_TYPE_IPQ40XX_AP_DK01_1_C2)
