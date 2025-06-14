@@ -1,30 +1,24 @@
-# Build script for U-Boot on various boards
-
-# Copyright (C) 2025 EMAIL# Copyright (C) 2025 1980490718@qq.com
+# Copyright (C) 2025 1980490718@qq.com
 # Author: Willem Lee <1980490718@qq.com>
-# Date: 2025-06-10 17:00:00
-# Version: 1.0
-# This script is free software; you can redistribute it and/or modify it under the terms of
-# the GNU General Public License as published by the Free Software Foundation;
-# either version 2 of the License, or (at your option) any later version.
-# This script is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-# without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the GNU General Public License for more details.
-# SPDX-License-Identifier: GPL-2.0-or-later.
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
 
-# Description: This script builds U-Boot for specified boards based on the configuration files in the U-Boot source directory.
-# It supports building all boards, cleaning build files, and displaying help information.
-# Usage: 
-# ./build.sh <board-name1> [board-name2 ...] or ./build.sh all or ./build.sh clean or ./build.sh clean_all or ./build.sh help
-# Exit immediately if a command exits with a non-zero status or if an unset variable is used.
-# and treat unset variables as an error when substituting.
-# Display the commands being executed.
-# Exit if any command in a pipeline fails.
-# Set the maximum size of the U-Boot image in bytes.
-# Set the staging directory for toolchains.
-# Set the toolchain path.
-# Set the make command with the specified architecture and cross-compiler.
-# Set the boot delay in seconds.
+# U-Boot Build Automation Script
+# Features:
+# - Auto-detects supported board configurations
+# - Supports individual or batch board compilation
+# - Generates verified firmware packages (ELF/BIN + MD5)
+# - Provides comprehensive cleanup options
+# - Detailed build logging and artifact reporting
+#
+# Usage Examples:
+# ./build.sh [board1] [board2]  # Build specific boards
+# ./build.sh all                # Build all detected boards
+# ./build.sh clean              # Clean build artifacts
+# ./build.sh clean_all          # Remove all generated files
+# ./build.sh help               # Show usage information
 
 #!/bin/bash
 
@@ -41,9 +35,6 @@ export CONFIG_BOOTDELAY=1
 export MAX_UBOOT_SIZE=524288
 
 # Define colors for output
-# Colors for terminal output
-# Reset colors
-# Colors for terminal output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -74,29 +65,35 @@ show_help() {
 
 # Function to build U-Boot for a specific board
 build_board() {
+	# Initialize build environment
 	local board=$1
 	local config_file="${UBOOT_DIR}/include/configs/ipq40xx_${board}.h"
 
+	# Setup build directory and log file
 	export BUILD_TOPDIR=$(pwd)
 	local LOGFILE="${BUILD_TOPDIR}/build.log"
 	echo -e "\n==== ⏳Building $board ====\n" >> "$LOGFILE"
 
+	# Verify config file exists
 	if [[ ! -f "$config_file" ]]; then
 		echo -e "${RED}❌ Error: Config file not found: ${config_file}${RESET}" | tee -a "$LOGFILE"
 		return 1
 	fi
 
-	echo -e "${CYAN}⌛===> Building board: ${board}${RESET}" | tee -a "$LOGFILE"
+	echo -e "${CYAN}===> ⌛Building board: ${board}${RESET}" | tee -a "$LOGFILE"
 
 	# Create build directory if it doesn't exist
 	mkdir -p "${BUILD_TOPDIR}/bin"
 
+	# Configure U-Boot for the target board
 	echo "===> 🔧Configuring: ipq40xx_${board}_config" | tee -a "$LOGFILE"
 	(cd "$UBOOT_DIR" && ${MAKECMD} ipq40xx_${board}_config 2>&1) | tee -a "$LOGFILE"
 
+	# Compile U-Boot
 	echo "===> 🔄Compiling..." | tee -a "$LOGFILE"
 	(cd "$UBOOT_DIR" && ${MAKECMD} ENDIANNESS=-EB V=1 all 2>&1) | tee -a "$LOGFILE"
 
+	# Check if the compilation was successful
 	local uboot_out="${UBOOT_DIR}/u-boot"
 	if [[ ! -f "$uboot_out" ]]; then
 		echo -e "${RED}❌ Error: u-boot file not generated${RESET}" | tee -a "$LOGFILE"
