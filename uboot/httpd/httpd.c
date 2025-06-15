@@ -34,6 +34,9 @@ extern const struct fsdata_file file_404_html;
 extern const struct fsdata_file file_flashing_html;
 extern const struct fsdata_file file_fail_html;
 
+extern int web_handle_read(char *response_buffer, size_t buffer_size);
+extern int web_handle_download(unsigned char **firmware_data, unsigned int *firmware_size);
+
 extern int webfailsafe_ready_for_upgrade;
 extern int webfailsafe_upgrade_type;
 extern ulong NetBootFileXferSize;
@@ -103,11 +106,16 @@ static void httpd_state_reset(void) {
 	hs->dataptr = 0;
 	hs->upload = 0;
 	hs->upload_total = 0;
+	// 添加固件下载状态重置
+	hs->firmware_data = NULL;
+	hs->firmware_size = 0;
+	hs->firmware_sent = 0;
+	hs->is_firmware_download = 0;
 	data_start_found = 0;
 	post_packet_counter = 0;
 	post_line_counter = 0;
 	if (boundary_value) {
-	free(boundary_value);
+		free(boundary_value);
 		boundary_value = NULL;
 	}
 }
@@ -191,6 +199,81 @@ static int httpd_findandstore_firstchunk(void) {
 	}
 	return(0);
 }
+// handle firmware read request
+static void handle_read_firmware_request(void) {
+	char resp_buf[1024];
+	int result = web_handle_read(resp_buf, sizeof(resp_buf));
+	static char http_header[] =
+		"HTTP/1.1 200 OK\r\n"
+		"Content-Type: text/plain\r\n"
+		"Connection: close\r\n\r\n";
+	hs->is_backupfw_resp = 1;
+	hs->backupfw_buf = (u8_t *)malloc(strlen(http_header) + strlen(resp_buf) + 1);
+	if (hs->backupfw_buf) {
+		strcpy((char *)hs->backupfw_buf, http_header);
+		strcat((char *)hs->backupfw_buf, resp_buf);
+		hs->backupfw_len = strlen((char *)hs->backupfw_buf);
+	} else {
+		hs->backupfw_buf = (u8_t *)http_header;
+		hs->backupfw_len = strlen(http_header);
+	}
+	hs->dataptr = hs->backupfw_buf;
+	hs->upload = hs->backupfw_len;
+	uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+}
+// handle firmware download request
+static void handle_download_firmware_request(void) {
+	unsigned char *firmware_data;
+	unsigned int firmware_size;
+	int result = web_handle_download(&firmware_data, &firmware_size);
+	if (result != 0) {
+		static char error_resp[] =
+			"HTTP/1.1 404 Not Found\r\n"
+			"Content-Type: text/plain\r\n"
+			"Connection: close\r\n\r\n"
+			"No firmware loaded";
+		hs->is_backupfw_resp = 1;
+		hs->backupfw_buf = (u8_t *)error_resp;
+		hs->backupfw_len = strlen(error_resp);
+		hs->dataptr = hs->backupfw_buf;
+		hs->upload = hs->backupfw_len;
+		uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+		return;
+	}
+	// 构造HTTP头部，但不包含固件数据
+	char *header_buf = malloc(256);
+	if (header_buf) {
+		snprintf(header_buf, 256,
+			"HTTP/1.1 200 OK\r\n"
+			"Content-Type: application/octet-stream\r\n"
+			"Content-Disposition: attachment; filename=\"firmware_backup.bin\"\r\n"
+			"Content-Length: %u\r\n"
+			"Connection: close\r\n\r\n",
+			firmware_size);
+		// 只发送HTTP头部
+		hs->is_backupfw_resp = 1;
+		hs->backupfw_buf = (u8_t *)header_buf;
+		hs->backupfw_len = strlen(header_buf);
+		hs->dataptr = hs->backupfw_buf;
+		hs->upload = hs->backupfw_len;
+		// 设置固件数据信息供后续发送
+		hs->firmware_data = firmware_data;
+		hs->firmware_size = firmware_size;
+		hs->firmware_sent = 0;
+		hs->is_firmware_download = 1;
+		uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+	} else {
+		static char error_resp[] =
+			"HTTP/1.1 500 Internal Server Error\r\n"
+			"Connection: close\r\n\r\n";
+		hs->is_backupfw_resp = 1;
+		hs->backupfw_buf = (u8_t *)error_resp;
+		hs->backupfw_len = strlen(error_resp);
+		hs->dataptr = hs->backupfw_buf;
+		hs->upload = hs->backupfw_len;
+		uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+	}
+}
 extern void gpio_set_value(int gpio_num, int value);
 void httpd_appcall(void) {
 	struct fs_file fsfile;
@@ -248,6 +331,9 @@ void httpd_appcall(void) {
 						hs->dataptr = hs->macrw_buf;
 						hs->upload = hs->macrw_len;
 						uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+						return;
+					} else if (strncmp((char*)&uip_appdata[4], "/download_firmware", 18) == 0) {
+						handle_download_firmware_request();
 						return;
 					}
 				}
@@ -315,6 +401,9 @@ void httpd_appcall(void) {
 						hs->upload = hs->macrw_len;
 						uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
 						do_reset(NULL, 0, 0, NULL);
+						return;
+					} else if(strncmp((char*)uip_appdata, "POST /read_firmware", 19) == 0) {
+						handle_read_firmware_request();
 						return;
 					}
 				}
@@ -440,6 +529,34 @@ void httpd_appcall(void) {
 					}
 					hs->dataptr += uip_conn->len;
 					hs->upload -= uip_conn->len;
+					uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+					return;
+				}
+				if (hs->is_backupfw_resp) {
+					if (hs->is_firmware_download && hs->firmware_data && hs->firmware_size > 0) {
+						hs->is_backupfw_resp = 0;
+						hs->dataptr = (u8_t *)hs->firmware_data;
+						hs->upload = hs->firmware_size;
+						uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
+					} else {
+						httpd_state_reset();
+						uip_close();
+						hs->is_backupfw_resp = 0;
+					}
+					return;
+				}
+				// 处理固件数据发送
+				if (hs->is_firmware_download && hs->firmware_data) {
+					if (hs->upload <= uip_mss()) {
+						// 固件发送完成
+						httpd_state_reset();
+						uip_close();
+						hs->is_firmware_download = 0;
+						return;
+					}
+					hs->dataptr += uip_conn->len;
+					hs->upload -= uip_conn->len;
+					hs->firmware_sent += uip_conn->len;
 					uip_send(hs->dataptr, (hs->upload > uip_mss() ? uip_mss() : hs->upload));
 					return;
 				}

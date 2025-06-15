@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<title>固件备份</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div class="main-container">
+		<nav class="side-nav">
+			<a href="index.html" class="nav-item"><span>📦固件更新</span></a>
+			<a href="uboot.html" class="nav-item"><span>🚀UBOOT更新</span></a>
+			<a href="art.html" class="nav-item"><span>📶ART更新</span></a>
+			<a href="mibib.html" class="nav-item"><span>📊MIBIB更新</span></a>
+			<a href="mac.html" class="nav-item"><span>🛠️MAC管理</span></a>
+			<a href="env.html" class="nav-item"><span>⚙️变量管理</span></a>
+			<a href="backup.html" class="nav-item active"><span>💾固件备份</span></a>
+		</nav>
+		<main class="content-area">
+			<section class="content-page active" id="page-backup">
+				<h1>💾固件备份</h1>
+				<div class="upload-card">
+					<form id="backup-form" autocomplete="off">
+						<div class="form-row">
+							<div class="form-group">
+								<label for="firmware-info">固件信息</label>
+								<input type="text" id="firmware-info" class="form-control" readonly placeholder="请先读取固件信息">
+							</div>
+						</div>
+						<div class="env-button-group">
+							<button type="button" class="submit-btn" id="read-btn">读取固件</button>
+							<button type="button" class="submit-btn" id="download-btn" disabled>备份固件</button>
+							<button type="button" class="submit-btn reboot-btn" id="reboot-btn">重启设备</button>
+						</div>
+					</form>
+				</div>
+				<div class="notice-box" id="backup-result"></div>
+			</section>
+		</main>
+	</div>
+	<script>
+		var firmwareLoaded = false;
+		var firmwareSize = 0;
+		// 读取固件按钮事件
+		document.getElementById('read-btn').onclick = function () {
+			var result = document.getElementById('backup-result');
+			var readBtn = document.getElementById('read-btn');
+			var downloadBtn = document.getElementById('download-btn');
+			var firmwareInfo = document.getElementById('firmware-info');
+			result.textContent = '请求已经收到，正在读取固件到内存中...';
+			result.className = 'notice-box';
+			readBtn.disabled = true;
+			readBtn.textContent = '固件读取中...';
+			fetch('/read_firmware', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+			}).then(r => r.text()).then(t => {
+				if (t.indexOf('Success') !== -1) {
+					result.className = 'notice-box success';
+					firmwareLoaded = true;
+					downloadBtn.disabled = false;
+					// 解析固件信息
+					var sizeMatch = t.match(/Size:\s*([^,\n]+)/);
+					var addrMatch = t.match(/Address:\s*([^,\n]+)/);
+					if (sizeMatch) {
+						firmwareInfo.value = sizeMatch[1] + (addrMatch ? ' @ ' + addrMatch[1] : '');
+					}
+				} else {
+					result.className = 'notice-box danger';
+					firmwareLoaded = false;
+					downloadBtn.disabled = true;
+					firmwareInfo.value = '';
+				}
+				result.textContent = t;
+			}).catch(function(error) {
+				result.textContent = '网络错误: ' + error.message;
+				result.className = 'notice-box danger';
+				firmwareLoaded = false;
+				downloadBtn.disabled = true;
+				firmwareInfo.value = '';
+			}).finally(function() {
+				readBtn.disabled = false;
+				readBtn.textContent = '读取固件';
+			});
+		};
+		// 备份固件按钮事件
+		document.getElementById('download-btn').onclick = function () {
+			if (!firmwareLoaded) {
+				var result = document.getElementById('backup-result');
+				result.textContent = '请先读取固件';
+				result.className = 'notice-box danger';
+				return;
+			}
+			var result = document.getElementById('backup-result');
+			var downloadBtn = document.getElementById('download-btn');
+			result.textContent = '请求已收到，正在将读取到内存中的固件下载到本地中...';
+			result.className = 'notice-box';
+			downloadBtn.disabled = true;
+			downloadBtn.textContent = '固件下载中...';
+			fetch('/download_firmware', {
+				method: 'GET'
+			}).then(function(response) {
+				if (response.ok) {
+					return response.blob();
+				} else {
+					throw new Error('下载失败: ' + response.status);
+				}
+			}).then(function(blob) {
+				// 创建下载链接
+				var url = window.URL.createObjectURL(blob);
+				var a = document.createElement('a');
+				a.style.display = 'none';
+				a.href = url;
+				a.download = 'firmware_backup.bin';
+				document.body.appendChild(a);
+				a.click();
+				window.URL.revokeObjectURL(url);
+				document.body.removeChild(a);
+				result.textContent = 'Success: 固件备份完成，保存文件名为：firmware_backup.bin';
+				result.className = 'notice-box success';
+			}).catch(function(error) {
+				result.textContent = '下载错误: ' + error.message;
+				result.className = 'notice-box danger';
+			}).finally(function() {
+				downloadBtn.disabled = false;
+				downloadBtn.textContent = '备份固件';
+			});
+		};
+		// 重启按钮事件
+		document.getElementById('reboot-btn').onclick = function () {
+			if (confirm('确定要重启设备吗？')) {
+				fetch('/reset', { method: 'POST' })
+					.then(r => r.text())
+					.then(t => {
+						alert('设备正在重启！\n' + t);
+					});
+			}
+		};
+		// 页面加载完成后的初始化
+		document.addEventListener('DOMContentLoaded', function() {
+			var result = document.getElementById('backup-result');
+			result.textContent = '固件备份页面已就绪，请先点击"读取固件"按钮，将固件读取内存中，等待读取完成之后，点击“备份固件”按钮将固件下载到本地。';
+			result.className = 'notice-box';
+		});
+	</script>
+</body>
+</html>

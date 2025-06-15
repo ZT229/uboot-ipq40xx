@@ -65,6 +65,13 @@ struct httpd_state {
 	unsigned char is_macrw_resp;
 	unsigned char *macrw_buf;
 	unsigned short macrw_len;
+	unsigned char is_backupfw_resp;
+	unsigned char *backupfw_buf;
+	unsigned short backupfw_len;
+	uint8_t is_firmware_download;
+	const uint8_t *firmware_data;
+	uint32_t firmware_size;
+	unsigned int firmware_sent;
 };
 
 
