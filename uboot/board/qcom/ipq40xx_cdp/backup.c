@@ -8,30 +8,15 @@ extern board_ipq40xx_params_t *gboard_param;
 extern int openwrt_firmware_start;
 extern int openwrt_firmware_size;
 
-static void print_size_info(const char *prefix, unsigned int size) {
-	if (size >= (1024 * 1024)) {
-		unsigned int mb = size / (1024 * 1024);
-		unsigned int remainder = size % (1024 * 1024);
-		printf("%s%d.%02d MB (%u bytes)", prefix, mb, (remainder*100)/(1024*1024), size);
-	} else if (size >= 1024) {
-		unsigned int kb = size / 1024;
-		unsigned int remainder = size % 1024;
-		printf("%s%d.%02d KB (%u bytes)", prefix, kb, (remainder*100)/1024, size);
-	} else {
-		printf("%s%u bytes", prefix, size);
-	}
-}
 static void format_size_string(char *buffer, size_t buffer_size, unsigned int size) {
 	if (size >= (1024 * 1024)) {
 		unsigned int mb = size / (1024 * 1024);
 		unsigned int remainder = size % (1024 * 1024);
-		snprintf(buffer, buffer_size, "%d.%02d MB (%u bytes)",
-			mb, (remainder*100)/(1024*1024), size);
+		snprintf(buffer, buffer_size, "%d.%02d MB (%u bytes)", mb, (remainder*100)/(1024*1024), size);
 	} else if (size >= 1024) {
 		unsigned int kb = size / 1024;
 		unsigned int remainder = size % 1024;
-		snprintf(buffer, buffer_size, "%d.%02d KB (%u bytes)",
-			kb, (remainder*100)/1024, size);
+		snprintf(buffer, buffer_size, "%d.%02d KB (%u bytes)", kb, (remainder*100)/1024, size);
 	} else {
 		snprintf(buffer, buffer_size, "%u bytes", size);
 	}
@@ -96,12 +81,14 @@ int read_firmware(void) {
 	int ret = run_command(cmd, 0);
 	if (ret == 0) {
 		printf("Success: Loaded 0x%x-0x%x to RAM at 0x88000000 - ", openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1);
-			print_size_info("", openwrt_firmware_size);
+			printf("Board Type: %s\n", get_board_type_string());
+			char size_str[64];
+			format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
+			printf("%s\n", size_str);
 			// Set firmware loaded flag and save parameters
 			firmware_loaded_to_ram = 1;
 			last_firmware_size = openwrt_firmware_size;
 			last_firmware_start = openwrt_firmware_start;
-			printf("\n");
 			return 0;
 		} else {
 			printf("Error: Failed to load firmware (code:%d)\n", ret);
@@ -149,27 +136,18 @@ U_BOOT_CMD(
 int web_handle_read(char *response_buffer, size_t buffer_size) {
 	int result = read_firmware();
 	char size_str[64];
-
 	if (result == 0) {
 		format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
 		snprintf(response_buffer, buffer_size,
-			"Success: 固件读取成功\n"
-			"Size: %s\n"
-			"Address: 0x%x-0x%x\n"
-			"RAM: 0x88000000\n"
-			"Board: %s",
-			size_str,
-			openwrt_firmware_start,
-			openwrt_firmware_start + openwrt_firmware_size - 1,
+			"Success: Firmware read completed\n Size: %s\n Address: 0x%x-0x%x\n RAM: 0x88000000\n Board: %s",
+			size_str, openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1,
 			get_board_type_string()
 		);
 	} else {
 		snprintf(response_buffer, buffer_size,
-			"Error: 固件读取失败\n"
-			"请检查存储设备连接状态"
+			"Error: Firmware read failed\n Please check the flash device connection status."
 		);
 	}
-
 	return result;
 }
 // Web interface function to handle firmware download request
@@ -178,10 +156,8 @@ int web_handle_download(unsigned char **firmware_data, unsigned int *firmware_si
 		printf("Error: No firmware loaded in RAM\n");
 		return -1;
 	}
-
 	*firmware_data = (unsigned char *)0x88000000;
 	*firmware_size = last_firmware_size;
-
 	printf("Preparing firmware download: %u bytes from RAM address 0x88000000\n", last_firmware_size);
 	return 0;
 }
