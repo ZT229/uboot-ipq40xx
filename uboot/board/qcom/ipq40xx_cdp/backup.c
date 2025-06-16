@@ -8,6 +8,8 @@ extern board_ipq40xx_params_t *gboard_param;
 extern int openwrt_firmware_start;
 extern int openwrt_firmware_size;
 
+static const char *fw_type_str;
+static void get_firmware_type_string(int fw_type);
 static void format_size_string(char *buffer, size_t buffer_size, unsigned int size) {
 	if (size >= (1024 * 1024)) {
 		unsigned int mb = size / (1024 * 1024);
@@ -41,9 +43,26 @@ static const char* get_board_type_string(void) {
 static int firmware_loaded_to_ram = 0;
 static unsigned int last_firmware_size = 0;
 static unsigned int last_firmware_start = 0;
+static void get_firmware_type_string(int fw_type) {
+	switch (fw_type) {
+		case FW_TYPE_OPENWRT_EMMC:
+			fw_type_str = "OpenWRT eMMC";
+			break;
+		case FW_TYPE_QSDK:
+			fw_type_str = "QSDK";
+			break;
+		case FW_TYPE_OPENWRT:
+			fw_type_str = "OpenWRT";
+			break;
+		default:
+			fw_type_str = "Unknown";
+			break;
+	}
+}
 int read_firmware(void) {
 	char cmd[128];
 	int fw_type = do_checkout_firmware();
+	get_firmware_type_string(fw_type);
 	switch (gboard_param->machid) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
@@ -77,28 +96,28 @@ int read_firmware(void) {
 			printf("Error: Unsupported board type!\n");
 			return -1;
 	}
-	printf("Loading firmware to RAM... ");
+	printf("Reading firmware to RAM... ");
 	int ret = run_command(cmd, 0);
 	if (ret == 0) {
-		printf("Success: Loaded 0x%x-0x%x to RAM at 0x88000000 - ", openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1);
-			printf("Board Type: %s\n", get_board_type_string());
-			char size_str[64];
-			format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
-			printf("%s\n", size_str);
-			// Set firmware loaded flag and save parameters
-			firmware_loaded_to_ram = 1;
-			last_firmware_size = openwrt_firmware_size;
-			last_firmware_start = openwrt_firmware_start;
-			return 0;
-		} else {
-			printf("Error: Failed to load firmware (code:%d)\n", ret);
-			// Reset firmware loaded flag on failure
-			firmware_loaded_to_ram = 0;
-			return -1;
+		printf("Board Type: %s\n", get_board_type_string());
+		printf("Success: Readed 0x%x-0x%x to RAM at 0x88000000\n", openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1);
+		char size_str[64];
+		format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
+		printf("%s\n", size_str);
+		printf("Firmware Type: %s\n", fw_type_str);
+		// Set firmware loaded flag and save parameters
+		firmware_loaded_to_ram = 1;
+		last_firmware_size = openwrt_firmware_size;
+		last_firmware_start = openwrt_firmware_start;
+		return 0;
+	} else {
+		printf("Error: Failed to Read firmware (code:%d)\n", ret);
+		// Reset firmware loaded flag on failure
+		firmware_loaded_to_ram = 0;
+		return -1;
 	}
 }
-int do_readfw(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
-{
+int do_readfw(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]) {
 	return read_firmware();
 }
 U_BOOT_CMD(
@@ -108,8 +127,7 @@ U_BOOT_CMD(
 	"Read firmware from flash storage into RAM at 0x88000000\n"
 	"for recovery or upgrade purposes."
 );
-int do_backupfw(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
-{
+int do_backupfw(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[]) {
 	if (read_firmware() != 0) {
 		return CMD_RET_FAILURE;
 	}
@@ -136,12 +154,14 @@ U_BOOT_CMD(
 int web_handle_read(char *response_buffer, size_t buffer_size) {
 	int result = read_firmware();
 	char size_str[64];
+	int fw_type = do_checkout_firmware();
+	get_firmware_type_string(fw_type);
 	if (result == 0) {
 		format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
 		snprintf(response_buffer, buffer_size,
-			"Success: Firmware read completed\n Size: %s\n Address: 0x%x-0x%x\n RAM: 0x88000000\n Board: %s",
+			"Success: Firmware read completed\n Size: %s\n Address: 0x%x-0x%x\n RAM: 0x88000000\n Board: %s\n Firmware Type: %s",
 			size_str, openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1,
-			get_board_type_string()
+			get_board_type_string(), fw_type_str
 		);
 	} else {
 		snprintf(response_buffer, buffer_size,

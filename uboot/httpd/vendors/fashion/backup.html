@@ -23,8 +23,12 @@
 					<form id="backup-form" autocomplete="off">
 						<div class="form-row">
 							<div class="form-group">
-								<label for="firmware-info">固件信息</label>
-								<input type="text" id="firmware-info" class="form-control" readonly placeholder="请先读取固件信息">
+								<label for="firmware-info">固件信息（Size@Address）：</label>
+								<input type="text" id="firmware-info" class="form-control" readonly placeholder="点击“读取固件”按钮等待完成后才能显示固件信息。">
+							</div>
+							<div class="form-group">
+								<label for="firmware-type">固件类型（OpenWRT/OpenWRT_eMMC/QSDK/Unknown）：</label>
+								<input type="text" id="firmware-type" class="form-control" readonly placeholder="读取完成后显示固件类型。">
 							</div>
 						</div>
 						<div class="env-button-group">
@@ -41,13 +45,13 @@
 	<script>
 		var firmwareLoaded = false;
 		var firmwareSize = 0;
-		// 读取固件按钮事件
 		document.getElementById('read-btn').onclick = function () {
 			var result = document.getElementById('backup-result');
 			var readBtn = document.getElementById('read-btn');
 			var downloadBtn = document.getElementById('download-btn');
 			var firmwareInfo = document.getElementById('firmware-info');
-			result.textContent = '请求已经收到，正在读取固件到内存中...';
+			var firmwareTypeInput = document.getElementById('firmware-type');
+			result.innerHTML = '•请求已收到！<br>•正在尝试读取固件到内存中。<br>•下载过程中可能需要一些时间，请耐心等待读取完成...';
 			result.className = 'notice-box';
 			readBtn.disabled = true;
 			readBtn.textContent = '固件读取中...';
@@ -59,41 +63,52 @@
 					result.className = 'notice-box success';
 					firmwareLoaded = true;
 					downloadBtn.disabled = false;
-					// 解析固件信息
+					result.innerHTML = '•固件读取成功！请点击<b>备份固件</b>按钮下载到本地。<br>' + 
+					'•<b>Size:</b> ' + t.match(/Size:\s*([^,\n]+)/)[1] + '<br>' +
+					'•<b>Address:</b> ' + t.match(/Address:\s*([^,\n]+)/)[1] + '<br>' +
+					'•<b>RAM address:</b> 0x88000000<br>' +
+					'•<b>Board:</b> ' + t.match(/Board:\s*([^,\n]+)/)[1] + '<br>' +
+					'•<b>Firmware Type:</b> ' + t.match(/Firmware Type:\s*([^,\n]+)/)[1];
 					var sizeMatch = t.match(/Size:\s*([^,\n]+)/);
 					var addrMatch = t.match(/Address:\s*([^,\n]+)/);
+					var typeMatch = t.match(/Firmware Type:\s*([^,\n]+)/);
 					if (sizeMatch) {
 						firmwareInfo.value = sizeMatch[1] + (addrMatch ? ' @ ' + addrMatch[1] : '');
+					}
+					if (typeMatch) {
+						firmwareTypeInput.value = typeMatch[1];
+					} else {
+						firmwareTypeInput.value = '无法获取固件类型信息';
 					}
 				} else {
 					result.className = 'notice-box danger';
 					firmwareLoaded = false;
 					downloadBtn.disabled = true;
 					firmwareInfo.value = '';
+					firmwareTypeInput.value = '未知固件类型';
 				}
-				result.textContent = t;
 			}).catch(function(error) {
-				result.textContent = '网络错误: ' + error.message;
+				result.innerHTML = '•网络错误: ' + error.message + '！<br>•请检查设备连接状态并重试。';
 				result.className = 'notice-box danger';
 				firmwareLoaded = false;
 				downloadBtn.disabled = true;
 				firmwareInfo.value = '';
+				firmwareTypeInput.value = '未知固件类型';
 			}).finally(function() {
 				readBtn.disabled = false;
 				readBtn.textContent = '读取固件';
 			});
 		};
-		// 备份固件按钮事件
 		document.getElementById('download-btn').onclick = function () {
 			if (!firmwareLoaded) {
 				var result = document.getElementById('backup-result');
-				result.textContent = '请先读取固件';
+				result.textContent = '请先点击“读取固件”按钮，将固件加载到内存后再进行备份操作。';
 				result.className = 'notice-box danger';
 				return;
 			}
 			var result = document.getElementById('backup-result');
 			var downloadBtn = document.getElementById('download-btn');
-			result.textContent = '请求已收到，正在将读取到内存中的固件下载到本地中...';
+			result.innerHTML = '请求已收到！<br>正在将内存中的固件下载到本地。<br>下载过程中可能需要一些时间，请耐心等待下载完成...';
 			result.className = 'notice-box';
 			downloadBtn.disabled = true;
 			downloadBtn.textContent = '固件下载中...';
@@ -103,7 +118,7 @@
 				if (response.ok) {
 					return response.blob();
 				} else {
-					throw new Error('下载失败: ' + response.status);
+					throw new Error(`下载失败: ${response.status}，服务器返回错误状态码。`);
 				}
 			}).then(function(blob) {
 				// 创建下载链接
@@ -116,30 +131,28 @@
 				a.click();
 				window.URL.revokeObjectURL(url);
 				document.body.removeChild(a);
-				result.textContent = 'Success: 固件备份完成，保存文件名为：firmware_backup.bin';
+				result.innerHTML = '•Success: 固件备份完成<br>•保存文件名为：firmware_backup.bin';
 				result.className = 'notice-box success';
 			}).catch(function(error) {
-				result.textContent = '下载错误: ' + error.message;
+				result.textContent = `下载错误: ${error.message}，请检查设备连接状态或稍后重试。`;
 				result.className = 'notice-box danger';
 			}).finally(function() {
 				downloadBtn.disabled = false;
 				downloadBtn.textContent = '备份固件';
 			});
 		};
-		// 重启按钮事件
 		document.getElementById('reboot-btn').onclick = function () {
-			if (confirm('确定要重启设备吗？')) {
+			if (confirm('确定要重启设备吗？重启操作可能会中断当前未完成的任务。')) {
 				fetch('/reset', { method: 'POST' })
 					.then(r => r.text())
 					.then(t => {
-						alert('设备正在重启！\n' + t);
+						alert(`设备正在重启！\n${t}`);
 					});
 			}
 		};
-		// 页面加载完成后的初始化
 		document.addEventListener('DOMContentLoaded', function() {
 			var result = document.getElementById('backup-result');
-			result.textContent = '固件备份页面已就绪，请先点击"读取固件"按钮，将固件读取内存中，等待读取完成之后，点击“备份固件”按钮将固件下载到本地。';
+			result.innerHTML = '•固件备份页面已就绪；<br>•请先点击"读取固件"按钮，将固件读取到内存中；<br>•等待读取完成之后，点击"备份固件"按钮将固件下载到本地。';
 			result.className = 'notice-box';
 		});
 	</script>
