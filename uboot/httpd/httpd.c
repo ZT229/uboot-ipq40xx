@@ -202,7 +202,7 @@ static int httpd_findandstore_firstchunk(void) {
 // handle firmware read request
 static void handle_read_firmware_request(void) {
 	char resp_buf[1024];
-	int result = web_handle_read(resp_buf, sizeof(resp_buf));
+	(void)web_handle_read(resp_buf, sizeof(resp_buf));
 	static char http_header[] =
 		"HTTP/1.1 200 OK\r\n"
 		"Content-Type: text/plain\r\n"
