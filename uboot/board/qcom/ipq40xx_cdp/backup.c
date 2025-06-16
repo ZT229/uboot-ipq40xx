@@ -3,6 +3,10 @@
 #include "ipq40xx_cdp.h"
 #include <command.h>
 
+#define KB_SIZE 1024
+#define MB_SIZE (KB_SIZE * KB_SIZE)
+#define PERCENT_MULTIPLIER 100
+
 extern int do_checkout_firmware(void);
 extern board_ipq40xx_params_t *gboard_param;
 extern int openwrt_firmware_start;
@@ -11,14 +15,14 @@ extern int openwrt_firmware_size;
 static const char *fw_type_str;
 static void get_firmware_type_string(int fw_type);
 static void format_size_string(char *buffer, size_t buffer_size, unsigned int size) {
-	if (size >= (1024 * 1024)) {
-		unsigned int mb = size / (1024 * 1024);
-		unsigned int remainder = size % (1024 * 1024);
-		snprintf(buffer, buffer_size, "%d.%02d MB (%u bytes)", mb, (remainder*100)/(1024*1024), size);
-	} else if (size >= 1024) {
-		unsigned int kb = size / 1024;
-		unsigned int remainder = size % 1024;
-		snprintf(buffer, buffer_size, "%d.%02d KB (%u bytes)", kb, (remainder*100)/1024, size);
+	if (size >= MB_SIZE) {
+		unsigned int mb = size / MB_SIZE;
+		unsigned int remainder = size % MB_SIZE;
+		snprintf(buffer, buffer_size, "%d.%02d MB (%u bytes)", mb, (remainder * PERCENT_MULTIPLIER) / MB_SIZE, size);
+	} else if (size >= KB_SIZE) {
+		unsigned int kb = size / KB_SIZE;
+		unsigned int remainder = size % KB_SIZE;
+		snprintf(buffer, buffer_size, "%d.%02d KB (%u bytes)", kb, (remainder * PERCENT_MULTIPLIER) / KB_SIZE, size);
 	} else {
 		snprintf(buffer, buffer_size, "%u bytes", size);
 	}
@@ -59,6 +63,9 @@ static void get_firmware_type_string(int fw_type) {
 			break;
 	}
 }
+static void print_firmware_read_info(const char *flash_type, unsigned int size, unsigned int start) {
+	printf("Reading %d.%02d MB (%u bytes) from %s flash at offset 0x%x\n", size / MB_SIZE, (size % MB_SIZE * PERCENT_MULTIPLIER) / MB_SIZE, size, flash_type, start);
+}
 int read_firmware(void) {
 	char cmd[128];
 	int fw_type = do_checkout_firmware();
@@ -67,30 +74,22 @@ int read_firmware(void) {
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C1:
 		case MACH_TYPE_IPQ40XX_AP_DK04_1_C3:
 			if (fw_type == FW_TYPE_OPENWRT_EMMC) {
-				printf("Reading %d.%02d MB (%u bytes) from eMMC flash at offset 0x%x\n",
-					openwrt_firmware_size/(1024*1024), (openwrt_firmware_size%(1024*1024)*100)/(1024*1024), openwrt_firmware_size, openwrt_firmware_start);
+				print_firmware_read_info("eMMC", openwrt_firmware_size, openwrt_firmware_start);
 				unsigned long blocks = (openwrt_firmware_size + 511) / 512;
-				snprintf(cmd, sizeof(cmd),
-					"mmc read 0x88000000 0x%x 0x%lx", openwrt_firmware_start, blocks);
+				snprintf(cmd, sizeof(cmd), "mmc read 0x88000000 0x%x 0x%lx", openwrt_firmware_start, blocks);
 			} else {
-				printf("Reading %d.%02d MB (%u bytes) from SPI flash at offset 0x%x\n",
-					openwrt_firmware_size/(1024*1024), (openwrt_firmware_size%(1024*1024)*100)/(1024*1024), openwrt_firmware_size, openwrt_firmware_start);
-				snprintf(cmd, sizeof(cmd),
-					"sf probe && sf read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
+				print_firmware_read_info("SPI", openwrt_firmware_size, openwrt_firmware_start);
+				snprintf(cmd, sizeof(cmd), "sf probe && sf read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
 			}
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C1:
-			printf("Reading %d.%02d MB (%u bytes) from SPI flash at offset 0x%x\n",
-				openwrt_firmware_size/(1024*1024), (openwrt_firmware_size%(1024*1024)*100)/(1024*1024), openwrt_firmware_size, openwrt_firmware_start);
-			snprintf(cmd, sizeof(cmd),
-				"sf probe && sf read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
+			print_firmware_read_info("SPI", openwrt_firmware_size, openwrt_firmware_start);
+			snprintf(cmd, sizeof(cmd), "sf probe && sf read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
 			break;
 		case MACH_TYPE_IPQ40XX_AP_DK01_1_C2:
 		case MACH_TYPE_IPQ40XX_AP_DK01_AP4220:
-			printf("Reading %d.%02d MB (%u bytes) from NAND flash at offset 0x%x\n",
-				openwrt_firmware_size/(1024*1024), (openwrt_firmware_size%(1024*1024)*100)/(1024*1024), openwrt_firmware_size, openwrt_firmware_start);
-			snprintf(cmd, sizeof(cmd),
-				"nand device 1 && nand read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
+			print_firmware_read_info("NAND", openwrt_firmware_size, openwrt_firmware_start);
+			snprintf(cmd, sizeof(cmd), "nand device 1 && nand read 0x88000000 0x%x 0x%x", openwrt_firmware_start, openwrt_firmware_size);
 			break;
 		default:
 			printf("Error: Unsupported board type!\n");
@@ -100,10 +99,10 @@ int read_firmware(void) {
 	int ret = run_command(cmd, 0);
 	if (ret == 0) {
 		printf("Board Type: %s\n", get_board_type_string());
-		printf("Success: Readed 0x%x-0x%x to RAM at 0x88000000\n", openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1);
+		printf("Success: Read 0x%x-0x%x to RAM at 0x88000000\n", openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1);
 		char size_str[64];
 		format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
-		printf("%s\n", size_str);
+		printf("Size: %s\n", size_str);
 		printf("Firmware Type: %s\n", fw_type_str);
 		// Set firmware loaded flag and save parameters
 		firmware_loaded_to_ram = 1;
@@ -111,7 +110,7 @@ int read_firmware(void) {
 		last_firmware_start = openwrt_firmware_start;
 		return 0;
 	} else {
-		printf("Error: Failed to Read firmware (code:%d)\n", ret);
+		printf("Error: Failed to read firmware (code:%d)\n", ret);
 		// Reset firmware loaded flag on failure
 		firmware_loaded_to_ram = 0;
 		return -1;
@@ -160,8 +159,7 @@ int web_handle_read(char *response_buffer, size_t buffer_size) {
 		format_size_string(size_str, sizeof(size_str), openwrt_firmware_size);
 		snprintf(response_buffer, buffer_size,
 			"Success: Firmware read completed\n Size: %s\n Address: 0x%x-0x%x\n RAM: 0x88000000\n Board: %s\n Firmware Type: %s",
-			size_str, openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1,
-			get_board_type_string(), fw_type_str
+			size_str, openwrt_firmware_start, openwrt_firmware_start + openwrt_firmware_size - 1, get_board_type_string(), fw_type_str
 		);
 	} else {
 		snprintf(response_buffer, buffer_size,
